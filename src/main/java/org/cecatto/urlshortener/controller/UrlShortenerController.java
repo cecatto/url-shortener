@@ -31,9 +31,7 @@ public class UrlShortenerController {
 
   @PostMapping(PATH_CREATE_V1)
   public ResponseEntity<Void> createV1(@RequestParam(PARAM_URL) URI longUrl) {
-    if (longUrl == null || !StringUtils.hasText(longUrl.toString())) {
-      throw new IllegalArgumentException("url cannot be null or empty");
-    }
+    checkEmpty(longUrl, PARAM_URL);
 
     var hash = hashService.hashUrl(longUrl);
     var requestUri = ServletUriComponentsBuilder.fromCurrentRequestUri().build();
@@ -43,6 +41,8 @@ public class UrlShortenerController {
 
   @GetMapping(PATH_LOOKUP)
   public ResponseEntity<Void> lookup(@PathVariable(PARAM_HASH) String hash) {
+    checkEmpty(hash, PARAM_HASH);
+
     var longUrl = hashService.lookup(hash);
 
     if (longUrl == null) {
@@ -50,6 +50,12 @@ public class UrlShortenerController {
     }
 
     return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(longUrl).build();
+  }
+
+  private void checkEmpty(Object param, String paramName){
+    if (param == null || !StringUtils.hasText(param.toString())) {
+      throw new IllegalArgumentException(paramName + " cannot be null or empty");
+    }
   }
 
 }

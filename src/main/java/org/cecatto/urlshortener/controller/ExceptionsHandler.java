@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -15,7 +16,8 @@ public class ExceptionsHandler {
 
   @ExceptionHandler({
       IllegalArgumentException.class,
-      MissingServletRequestParameterException.class
+      MissingServletRequestParameterException.class,
+      MethodArgumentTypeMismatchException.class
   })
   public ResponseEntity<ApiError> handleBadRequest(Exception e) {
     return ResponseEntity.badRequest().body(new ApiError(e.getMessage()));
