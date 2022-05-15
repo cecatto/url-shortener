@@ -8,18 +8,23 @@ servers:
     description: Local development server
 
 paths:
-  /v1/create/{long_url}:
-    put:
+  /v1/create:
+    post:
       description: >
         Creates a short version of the supplied URL.
         This operation is idempotent (if the same long URL is fed twice, the resulting short URL will be the same).
-      parameters:
-        - in: path
-          name: long_url
-          schema:
-            type: string
-          required: true
-          description: The URL to be shortened
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: The URL to be shortened
+            encoding:
+              url:
+                allowReserved: true
       responses:
         '201':
           description: Successful response containing the short URL in the Location header for future use.
