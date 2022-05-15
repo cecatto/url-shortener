@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: URL Shortener API
+  description: Allows the user to create and access short aliases of URLs.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /v1/create/{long_url}:
+    put:
+      description: >
+        Creates a short version of the supplied URL.
+        This operation is idempotent (if the same long URL is fed twice, the resulting short URL will be the same).
+      parameters:
+        - in: path
+          name: long_url
+          schema:
+            type: string
+          required: true
+          description: The URL to be shortened
+      responses:
+        '201':
+          description: Successful response containing the short URL in the Location header for future use.
+          headers:
+            location:
+              $ref: '#/components/headers/location'
+
+  /s/{hash}:
+    get:
+      description: Redirects the caller to an URL mapped to the provided hash (if any).
+      parameters:
+        - in: path
+          name: hash
+          schema:
+            type: string
+          required: true
+          description: A hash value provided by this APIs /create operation
+      responses:
+        '301':
+          description: A redirection response to the long URL.
+          headers:
+            location:
+              $ref: '#/components/headers/location'
+
+components:
+  headers:
+    location:
+      schema:
+        type: string
+      description: Contains the URL to be followed.
+      example: "http://example.com/s/a1b2c3d4"
