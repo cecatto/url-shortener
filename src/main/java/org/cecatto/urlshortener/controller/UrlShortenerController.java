@@ -1,10 +1,13 @@
 package org.cecatto.urlshortener.controller;
 
+import org.cecatto.urlshortener.service.HashService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriTemplate;
 
 import java.net.URI;
 
@@ -18,13 +21,20 @@ public class UrlShortenerController {
   public static final String PATH_LOOKUP = "/s/{" + PARAM_HASH + "}";
   public static final String PATH_CREATE_V1 = "/v1/create/{" + PARAM_LONG_URL + "}";
 
+  private final HashService hashService;
+
+  @Autowired
+  public UrlShortenerController(HashService hashService){
+    this.hashService = hashService;
+  }
+
   @PutMapping(PATH_CREATE_V1)
   public ResponseEntity<Void> createV1(@PathVariable(PARAM_LONG_URL) URI longUrl) {
-    var hash = "12345";
+    var hash = hashService.hashUrl(longUrl);
     var requestUri = ServletUriComponentsBuilder.fromCurrentRequestUri().build();
     var scheme = requestUri.getScheme();
-    var host = requestUri.getHost();
-    return ResponseEntity.created(URI.create(scheme + "://" + host + PATH_LOOKUP + hash)).build();
+    var location = new UriTemplate(scheme + "://" + requestUri.toUri().getAuthority() + PATH_LOOKUP).expand(hash);
+    return ResponseEntity.created(location).build();
   }
 
   @GetMapping(PATH_LOOKUP)
