@@ -43,7 +43,8 @@ public class HashServiceImpl implements HashService {
 
   @Override
   public URI lookup(String hash) {
-    return null;
+    var maybeUrl = urlRepository.findByHash(hash);
+    return maybeUrl.map(storedUrl -> URI.create(storedUrl.getLongUrl())).orElse(null);
   }
 
   private String buildHash(URI longUrl) {

@@ -43,8 +43,13 @@ public class UrlShortenerController {
 
   @GetMapping(PATH_LOOKUP)
   public ResponseEntity<Void> lookup(@PathVariable(PARAM_HASH) String hash) {
-    var longUrl = "http://www.example.com";
-    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(URI.create(longUrl)).build();
+    var longUrl = hashService.lookup(hash);
+
+    if (longUrl == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(longUrl).build();
   }
 
 }

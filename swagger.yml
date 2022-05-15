@@ -31,6 +31,12 @@ paths:
           headers:
             location:
               $ref: '#/components/headers/location'
+        '400':
+          description: If the request is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
 
   /s/{hash}:
     get:
@@ -48,6 +54,8 @@ paths:
           headers:
             location:
               $ref: '#/components/headers/location'
+        '404':
+          description: If nothing is found for the given hash
 
 components:
   headers:
@@ -56,3 +64,12 @@ components:
         type: string
       description: Contains the URL to be followed.
       example: "http://example.com/s/a1b2c3d4"
+
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+      required:
+        - errorMessage
