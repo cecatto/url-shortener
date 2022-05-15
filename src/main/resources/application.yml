@@ -1,4 +1,17 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/url_shortener
+    username: postgres
+    password: postgres
+  flyway:
+    enabled: true
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+  jpa:
+    open-in-view: false
 
 server:
   port: 8080
+
+logging:
+  org.flyway.core: INFO
