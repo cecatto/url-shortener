@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 @Entity
 public class StoredUrl {
@@ -45,6 +46,19 @@ public class StoredUrl {
   @Override
   public String toString() {
     return longUrl + " - " + hash;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    StoredUrl storedUrl = (StoredUrl) o;
+    return longUrl.equals(storedUrl.longUrl) && hash.equals(storedUrl.hash) && Objects.equals(createdAt, storedUrl.createdAt);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(longUrl, hash, createdAt);
   }
 
 }
