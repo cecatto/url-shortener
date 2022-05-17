@@ -17,9 +17,12 @@ import java.net.URI;
 @Validated
 public class UrlShortenerController {
 
+  // ideally, this should come from configuration
+  public static final String HASH_REGEX = "[a-z0-9-]{8,20}";
   public static final String PARAM_URL = "url";
   public static final String PARAM_HASH = "hash";
   public static final String PATH_LOOKUP = "/s/{" + PARAM_HASH + "}";
+  public static final String PATH_LOOKUP_VALIDATED = "/s/{" + PARAM_HASH + ":" + HASH_REGEX + "}";
   public static final String PATH_CREATE_V1 = "/v1/create";
 
   private final HashService hashService;
@@ -39,7 +42,7 @@ public class UrlShortenerController {
     return ResponseEntity.created(location).build();
   }
 
-  @GetMapping(PATH_LOOKUP)
+  @GetMapping(PATH_LOOKUP_VALIDATED)
   public ResponseEntity<Void> lookup(@PathVariable(PARAM_HASH) String hash) {
     checkEmpty(hash, PARAM_HASH);
 

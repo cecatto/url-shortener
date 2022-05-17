@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:14.2:///url_shortener?TC_DAEMON=true
+    username: postgres
+    password: postgres
