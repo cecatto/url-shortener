@@ -3,9 +3,12 @@ package org.cecatto.urlshortener.service.impl;
 import org.cecatto.urlshortener.persistence.StoredUrl;
 import org.cecatto.urlshortener.persistence.UrlRepository;
 import org.cecatto.urlshortener.service.HashService;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -35,8 +38,8 @@ public class HashServiceImpl implements HashService {
     }
 
     var hash = buildHash(uriToSave);
-    var storedUrl = urlRepository.save(new StoredUrl(uriToSave.toString(), hash));
-    log.info("Stored " + storedUrl);
+
+    storeUrl(uriToSave, hash);
 
     return hash;
   }
@@ -51,4 +54,19 @@ public class HashServiceImpl implements HashService {
     return UUID.nameUUIDFromBytes(longUrl.toString().getBytes()).toString().substring(0, 8);
   }
 
+  private void storeUrl(URI longUrl, String hash) {
+    try {
+      var storedUrl = urlRepository.save(new StoredUrl(longUrl.toString(), hash));
+      log.info("Stored " + storedUrl);
+    } catch (DataIntegrityViolationException e) {
+      if (e.getRootCause() instanceof PSQLException) {
+        var psqlException = (PSQLException) e.getRootCause();
+        if (PSQLState.UNIQUE_VIOLATION.getState().equals(psqlException.getSQLState())) {
+          // it means the url was already added to the database in the meantime, nothing to do
+          return;
+        }
+      }
+      throw e;
+    }
+  }
 }
