@@ -1,10 +1,11 @@
 plugins {
     id 'java'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'com.google.cloud.tools.jib' version '3.2.1'
 }
 
 group 'org.cecatto'
-version '1.0-SNAPSHOT'
+version '1.0.0-SNAPSHOT'
 
 defaultTasks 'clean', 'build'
 
