@@ -48,14 +48,14 @@ public class UrlShortenerController {
 
     var longUrl = hashService.lookup(hash);
 
-    if (longUrl == null) {
+    if (longUrl.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
 
-    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(longUrl).build();
+    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(longUrl.get()).build();
   }
 
-  private void checkEmpty(Object param, String paramName){
+  private void checkEmpty(Object param, String paramName) {
     if (param == null || !StringUtils.hasText(param.toString())) {
       throw new IllegalArgumentException(paramName + " cannot be null or empty");
     }

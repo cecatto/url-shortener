@@ -59,7 +59,8 @@ public class HashServiceImplTest {
     var mockedUri = URI.create("http://www.example.com");
     Mockito.doReturn(Optional.of(new StoredUrl("http://www.example.com", hash))).when(mockedUrlRepository).findByHash(hash);
     var uri = hashService.lookup(hash);
-    Assertions.assertEquals(mockedUri, uri);
+    Assertions.assertFalse(uri.isEmpty());
+    Assertions.assertEquals(mockedUri, uri.get());
   }
 
   @Test
@@ -67,7 +68,7 @@ public class HashServiceImplTest {
     var hash = "the_hash_value";
     Mockito.doReturn(Optional.empty()).when(mockedUrlRepository).findByHash(hash);
     var uri = hashService.lookup(hash);
-    Assertions.assertNull(uri);
+    Assertions.assertFalse(uri.isPresent());
   }
 
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -45,9 +46,9 @@ public class HashServiceImpl implements HashService {
   }
 
   @Override
-  public URI lookup(String hash) {
+  public Optional<URI> lookup(String hash) {
     var maybeUrl = urlRepository.findByHash(hash);
-    return maybeUrl.map(storedUrl -> URI.create(storedUrl.getLongUrl())).orElse(null);
+    return maybeUrl.map(storedUrl -> URI.create(storedUrl.getLongUrl()));
   }
 
   private String buildHash(URI longUrl) {
