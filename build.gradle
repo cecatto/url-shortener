@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.google.cloud.tools.jib' version '3.2.1'
+    id 'com.adarshr.test-logger' version "3.2.0"
 }
 
 group 'org.cecatto'
@@ -44,4 +45,13 @@ dependencies {
 
 test {
     useJUnitPlatform()
+
+    reports {
+        junitXml.enabled = false
+        html.enabled = true
+    }
+
+    doLast {
+        println "Test report: file:///" + reports.html.entryPoint.toString().replace('\\', '/')
+    }
 }
