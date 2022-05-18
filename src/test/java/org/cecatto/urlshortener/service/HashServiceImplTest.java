@@ -10,6 +10,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.net.URI;
 import java.util.Optional;
@@ -69,6 +72,29 @@ public class HashServiceImplTest {
     Mockito.doReturn(Optional.empty()).when(mockedUrlRepository).findByHash(hash);
     var uri = hashService.lookup(hash);
     Assertions.assertFalse(uri.isPresent());
+  }
+
+  @Test
+  public void testCreateWithConflictingHashes() {
+    var originalUrl = "http://www.example.com";
+    var anotherUrl = "http://www.google.com";
+    var originalHash = "847310eb";
+    var saltedHash = "4828244d";
+    var storedUrl = new StoredUrl(originalUrl, originalHash);
+    var storedUrlWithSaltedHash = new StoredUrl(originalUrl, saltedHash);
+
+    Mockito.doThrow(
+            new DataIntegrityViolationException("mocked data integrity violation",
+                new PSQLException("mocked unique violation", PSQLState.UNIQUE_VIOLATION)))
+        .when(mockedUrlRepository).save(storedUrl);
+
+    Mockito.doReturn(Optional.of(new StoredUrl(anotherUrl, originalHash))).when(mockedUrlRepository).findByHash(originalHash);
+    Mockito.doReturn(storedUrlWithSaltedHash).when(mockedUrlRepository).save(storedUrlWithSaltedHash);
+
+    var newHash = hashService.hashUrl(URI.create(originalUrl));
+
+    Assertions.assertEquals(saltedHash, newHash);
+    Assertions.assertNotEquals(originalHash, newHash);
   }
 
 }

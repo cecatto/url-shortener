@@ -40,9 +40,7 @@ public class HashServiceImpl implements HashService {
 
     var hash = buildHash(uriToSave);
 
-    storeUrl(uriToSave, hash);
-
-    return hash;
+    return storeUrl(uriToSave, hash);
   }
 
   @Override
@@ -52,19 +50,34 @@ public class HashServiceImpl implements HashService {
   }
 
   private String buildHash(URI longUrl) {
-    return UUID.nameUUIDFromBytes(longUrl.toString().getBytes()).toString().substring(0, 8);
+    return buildHash(longUrl, "");
   }
 
-  private void storeUrl(URI longUrl, String hash) {
+  private String buildHash(URI longUrl, String salt) {
+    return UUID.nameUUIDFromBytes((salt + longUrl.toString()).getBytes()).toString().substring(0, 8);
+  }
+
+  private String storeUrl(URI longUrl, String hash) {
     try {
       var storedUrl = urlRepository.save(new StoredUrl(longUrl.toString(), hash));
       log.info("Stored " + storedUrl);
+      return storedUrl.getHash();
     } catch (DataIntegrityViolationException e) {
       if (e.getRootCause() instanceof PSQLException) {
         var psqlException = (PSQLException) e.getRootCause();
         if (PSQLState.UNIQUE_VIOLATION.getState().equals(psqlException.getSQLState())) {
-          // it means the url was already added to the database in the meantime, nothing to do
-          return;
+          var maybeUrl = lookup(hash);
+          if (maybeUrl.isPresent()) {
+            var existingUrl = maybeUrl.get();
+            if (existingUrl.equals(longUrl)) {
+              // it means the url was already added to the database in the meantime, nothing to do
+              return hash;
+            } else {
+              log.warn("Conflicted hash {} for url {} when storing it, found url {}. Retrying...", hash, longUrl, existingUrl);
+              // retry with a salted hash (using the previous hash as salt)
+              return storeUrl(longUrl, buildHash(longUrl, hash));
+            }
+          }
         }
       }
       throw e;
