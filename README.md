@@ -21,3 +21,18 @@ Run `./gradlew`. This will execute the default tasks `clean build` and also run 
 In the project directory:
  - Build the Docker image with `./gradlew jibDockerBuild`. This will create the image `url-shortener:1.0.0-SNAPSHOT` in your local storage.
  - Run `docker compose up` (or `docker-compose up` if you are using Docker Compose v1). This will start the Postgres database and the application.
+
+## Request examples
+#### Create operation
+```shell
+curl --request POST \
+  --url http://localhost:8080/v1/create \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data url=www.example.com
+```
+
+#### Lookup operation
+```shell
+curl --request GET \
+  --url http://localhost:8080/s/847310eb
+```
